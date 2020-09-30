@@ -7,6 +7,13 @@ export function getCategory() {
   })
 }
 
+export function getCategoryDetails(id) {
+  return request({
+    url: `/rest/category/${id}`,
+    method: 'get'
+  })
+}
+
 export function removeCategory(id) {
   return request({
     url: `/rest/category/${id}`,
@@ -18,6 +25,14 @@ export function addCategory(data) {
   return request({
     url: '/rest/category',
     method: 'post',
+    data
+  })
+}
+
+export function editCategory(id, data) {
+  return request({
+    url: `/rest/category/${id}`,
+    method: 'put',
     data
   })
 }

@@ -35,13 +35,26 @@
       </el-table-column>
       <el-table-column fixed="right" label="状态" width="100">
         <template slot-scope="scope">
-          {{ scope.row.isShow }}
+          <el-button
+            :type="scope.row.isShow ? 'danger' : 'primary'"
+            @click="update(scope.row)"
+          >
+            {{ scope.row.isShow | getStatus }}
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
-          <el-button size="small" type="text" @click="handleClick(scope.row)">编辑</el-button>
-          <el-button size="small" type="text" @click="removeCategory(scope.row)">删除</el-button>
+          <el-button
+            size="small"
+            type="text"
+            @click="handleClick(scope.row)"
+          >编辑</el-button>
+          <el-button
+            size="small"
+            type="text"
+            @click="removeCategory(scope.row)"
+          >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -49,8 +62,13 @@
 </template>
 
 <script>
-import { getGood, removeGood } from '@/api/good'
+import { getGood, removeGood, updateGood } from '@/api/good'
 export default {
+  filters: {
+    getStatus(status) {
+      return status ? '已下架' : '已上架'
+    }
+  },
   data() {
     return {
       list: null,
@@ -87,6 +105,29 @@ export default {
           } catch (error) {
             this.$message.error('删除失败!')
           }
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
+    },
+    async update(data) {
+      this.$confirm(`您确定  ${data.isShow ? ' 上架 ' : '下架'} 产品吗?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async() => {
+          const sendData = { ...data }
+          sendData.isShow = !data.isShow
+          await updateGood(data._id, sendData)
+          this.fetchData()
+          this.$message({
+            type: 'success',
+            message: '修改成功!'
+          })
         })
         .catch(() => {
           this.$message({

@@ -21,3 +21,11 @@ export function addGood(data) {
     data
   })
 }
+
+export function updateGood(type, data) {
+  return request({
+    url: `/rest/good/${type}`,
+    method: 'put',
+    data
+  })
+}

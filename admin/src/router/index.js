@@ -66,8 +66,16 @@ export const constantRoutes = [
       {
         path: 'add',
         name: 'categoryAdd',
-        component: () => import('@/views/category/add'),
+        component: () => import('@/views/category/category'),
         meta: { title: '添加分类', icon: 'table' }
+      },
+      {
+        path: 'edit/:id',
+        name: 'categoryEdit',
+        props: true,
+        hidden: true,
+        component: () => import('@/views/category/category'),
+        meta: { title: '编辑分类', icon: 'table' }
       },
       {
         path: 'all',

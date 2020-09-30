@@ -25,8 +25,16 @@
       </el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
-          <el-button size="small" type="text" @click="handleClick(scope.row)">编辑</el-button>
-          <el-button size="small" type="text" @click="removeCategory(scope.row)">删除</el-button>
+          <el-button
+            size="small"
+            type="text"
+            @click="handleClick(scope.row)"
+          >编辑</el-button>
+          <el-button
+            size="small"
+            type="text"
+            @click="removeCategory(scope.row)"
+          >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -49,12 +57,17 @@ export default {
     async fetchData() {
       this.listLoading = true
       const { data } = await getCategory()
-      console.log(data)
       this.list = data.list
       this.listLoading = false
     },
     handleClick(row) {
-      console.log(row)
+      this.$router.push({
+        path: '/category/edit/',
+        name: 'categoryEdit',
+        params: {
+          id: row._id
+        }
+      })
     },
     async removeCategory(row) {
       this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {

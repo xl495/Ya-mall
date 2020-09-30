@@ -61,7 +61,7 @@ module.exports = app => {
 
     const data = await req.Model.findById(req.params.id);
 
-    res.send({ data: data });
+    res.send({ code: 200, data: data });
   });
 
   const auth = require('../../middleware/auth'); // 登陆效验
