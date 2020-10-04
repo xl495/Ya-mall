@@ -128,6 +128,27 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/sku',
+    component: Layout,
+    redirect: '/sku/all',
+    name: 'Sku',
+    meta: { title: '规格管理', icon: 'lock' },
+    children: [
+      {
+        path: 'add',
+        name: 'SkuAdd',
+        component: () => import('@/views/sku/add'),
+        meta: { title: '添加规格', icon: 'table' }
+      },
+      {
+        path: 'all',
+        name: 'SkuAll',
+        component: () => import('@/views/sku/all'),
+        meta: { title: '全部规格', icon: 'table' }
+      }
+    ]
+  },
+  {
     path: '/example',
     component: Layout,
     redirect: '/example/table',
