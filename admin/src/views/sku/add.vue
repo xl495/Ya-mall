@@ -2,8 +2,16 @@
   <div class="app-container">
     <el-row type="flex">
       <el-col :span="6">
-        <el-input v-model="attrAddText" placeholder="添加属性" style="padding-bottom: 20px">
-          <el-button slot="append" type="primary" @click="addAttr">添加</el-button>
+        <el-input
+          v-model="attrAddText"
+          placeholder="添加属性"
+          style="padding-bottom: 20px"
+        >
+          <el-button
+            slot="append"
+            type="primary"
+            @click="addAttr"
+          >添加</el-button>
         </el-input>
 
         <el-card
@@ -48,7 +56,63 @@
           >+ 添加新规格</el-button>
         </el-card>
       </el-col>
-      <el-col :span="18" />
+      <el-col :span="1" />
+      <el-col v-if="sku" :span="17">
+        <el-table :data="sku" style="width: 100%">
+          <el-table-column prop="name" label="名称" />
+
+          <el-table-column width="100" prop="stock" label="库存" fixed="right">
+            <template slot-scope="scope">
+              <el-input
+                v-model="scope.row.stock"
+                size="mini"
+                clearable
+                placeholder="库存"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column fixed="right" prop="price" label="价格" width="180">
+            <template slot-scope="scope">
+              <el-input
+                v-model="scope.row.price"
+                size="mini"
+                clearable
+                placeholder="价格"
+              />
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <el-card style="margin-top: 20px" shadow="hover">
+          <el-row type="flex" align="middle">
+            <el-col :span="16">批量设置</el-col>
+            <el-col :span="8">
+              <el-input v-model="batchNum" size="mini" placeholder="请输入内容">
+                <el-select
+                  slot="prepend"
+                  v-model="batchType"
+                  placeholder="请选择"
+                  style="width: 80px"
+                >
+                  <el-option label="库存" value="stock" />
+                  <el-option label="价格" value="price" />
+                </el-select>
+                <el-button
+                  slot="append"
+                  type="primary"
+                  @click="batchSetting"
+                >设置</el-button>
+              </el-input>
+            </el-col>
+          </el-row>
+          <div style="el-flex">
+            <el-button
+              type="primary"
+              @click="batchSetting"
+            >确认添加</el-button>
+          </div>
+        </el-card>
+      </el-col>
     </el-row>
   </div>
 </template>
@@ -58,6 +122,8 @@
 export default {
   data() {
     return {
+      batchNum: 0,
+      batchType: 'stock',
       attrAddText: null,
       inputVisible: false,
       spec: [
@@ -109,8 +175,22 @@ export default {
       category: []
     }
   },
+  computed: {
+    sku: {
+      get() {
+        const spec = this.spec.map(x => {
+          return x.item.map(xx => xx.name)
+        })
+        return this.createSku(spec)
+      },
+      set() {
+
+      }
+    }
+  },
   methods: {
     addAttr() {
+      if (this.attrAddText == '' || this.attrAddText == null) return
       if (this.spec.findIndex(item => item.name === this.attrAddText) === -1) {
         this.spec.push({
           name: this.attrAddText,
@@ -122,7 +202,6 @@ export default {
       } else {
         this.$message.error('已有此属性,请勿重复添加!')
       }
-
       this.attrAddText = null
     },
     handleInputConfirm(e) {
@@ -138,7 +217,6 @@ export default {
         })
         this.spec[e].addText = null
       } else {
-        console.log(e)
         this.spec[e].addText = null
         this.$message.error('添加错误,请输入有效值或规格不能重复')
       }
@@ -162,6 +240,37 @@ export default {
       */
       console.log(index, i)
       this.spec[index].item.splice(i, 1)
+    },
+    createSku(args) {
+      const reslut = []
+      const nextPush = (index, prev) => {
+        // prev 下一次遍历
+        const isLasted = index === args.length - 1 // 最后一项
+        const arg = args[index]
+
+        arg.forEach(item => {
+          const cur = [...prev, item]
+          if (isLasted) {
+            // 如果已是最后一项
+            reslut.push({ name: cur.toString(), price: 0, stock: 0 })
+          } else {
+            // 否则继续遍历下一项
+            nextPush(index + 1, cur)
+          }
+        })
+      }
+      nextPush(0, [])
+      console.log(reslut)
+      return reslut
+    },
+    batchSetting() {
+      console.log(this.batchNum)
+      console.log(this.batchType)
+      console.log(this.sku)
+      this.sku = this.sku.map(x => {
+        x[this.batchType] = this.batchNum
+        return x
+      })
     }
   }
 }
