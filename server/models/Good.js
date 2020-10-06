@@ -6,8 +6,8 @@ const schema = new mongoose.Schema(
       default: '',
     },
     images: {
-      type: Array,
-      default: [],
+      type: String, //数组的话前端传不过来
+      required: true
     },
     title: {
       type: String,
@@ -29,18 +29,26 @@ const schema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    price:{
+    isSku: {
+      type: Boolean,
+      default: false,
+    },
+    spec: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'goodAttribute',
+    },
+    price: {
       type: Number,
-      required: true
+      required: true,
     },
     through_price: {
       type: Number,
-      required: true
+      required: true,
     },
     count: {
       type: Number,
-      default: 0
-    }
+      default: 0,
+    },
   },
   {
     timestamps: true,

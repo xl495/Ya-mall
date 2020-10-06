@@ -29,3 +29,33 @@ export function updateGood(type, data) {
     data
   })
 }
+
+export function addGoodAttr(data) {
+  return request({
+    url: '/rest/goodAttribute',
+    method: 'post',
+    data
+  })
+}
+
+export function getGoodAttr() {
+  return request({
+    url: '/rest/goodAttribute',
+    method: 'get'
+  })
+}
+
+export function removeGoodAttr(id) {
+  return request({
+    url: `/rest/goodAttribute/${id}`,
+    method: 'delete'
+  })
+}
+
+export function addGoodSpec(data) {
+  return request({
+    url: '/rest/goodSpec',
+    method: 'post',
+    data
+  })
+}

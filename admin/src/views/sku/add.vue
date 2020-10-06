@@ -15,7 +15,7 @@
         </el-input>
 
         <el-card
-          v-for="(item, index) in spec"
+          v-for="(item, index) in specAttr"
           :key="index"
           class="box-card"
           shadow="hover"
@@ -59,15 +59,15 @@
       <el-col :span="1" />
       <el-col v-if="sku" :span="17">
         <el-table :data="sku" style="width: 100%">
-          <el-table-column prop="name" label="名称" />
+          <el-table-column prop="name" label="规格名称" />
 
-          <el-table-column width="100" prop="stock" label="库存" fixed="right">
+          <el-table-column width="150" prop="stock" label="库存" fixed="right">
             <template slot-scope="scope">
               <el-input
                 v-model="scope.row.stock"
                 size="mini"
                 clearable
-                placeholder="库存"
+                placeholder="留空为无限库存"
               />
             </template>
           </el-table-column>
@@ -105,20 +105,67 @@
               </el-input>
             </el-col>
           </el-row>
-          <div style="el-flex">
+          <div class="submit">
             <el-button
               type="primary"
-              @click="batchSetting"
-            >确认添加</el-button>
+              size="mini"
+              @click="preview"
+            >预览</el-button>
+
+            <el-input
+              v-model="form.name"
+              placeholder="规格标题"
+              style="200px"
+              size="mini"
+            >
+              <el-button
+                slot="append"
+                type="primary"
+                size="mini"
+                @click="submit"
+              >确认添加</el-button>
+            </el-input>
           </div>
         </el-card>
       </el-col>
     </el-row>
+    <el-dialog title="规格预览" :visible.sync="dialogTableVisible">
+      <div class="sku-wrap">
+        <div v-for="(item, index) in previewSku" :key="index" class="sku">
+          <div class="sku-attr">
+            <div class="sku-attr__title">
+              {{ item.name }}
+            </div>
+          </div>
+          <div class="sku-content">
+            <el-radio-group
+              v-model="item.check"
+              size="mini"
+              @change="skuSelected"
+            >
+              <el-radio-button
+                v-for="(items, i) in item.item"
+                :key="i"
+                :disabled="items.disabled"
+                :label="i"
+              >
+                {{ items.name }}
+              </el-radio-button>
+            </el-radio-group>
+          </div>
+        </div>
+      </div>
+      <div class="sku-minor">
+        <div class="sku-minor__title">已选规格： {{ skuSelectedText }}</div>
+        <div class="sku-minor__title">已选库存： {{ skuSelectedStock }}</div>
+        <div class="sku-minor__title">已选价格： {{ skuSelectedPrice }}</div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-// import { getCategory } from '@/api/category'
+import { addGoodAttr, addGoodSpec } from '@/api/good'
 export default {
   data() {
     return {
@@ -126,7 +173,8 @@ export default {
       batchType: 'stock',
       attrAddText: null,
       inputVisible: false,
-      spec: [
+      dialogTableVisible: false, // 预览
+      specAttr: [
         {
           name: '颜色',
           addText: null,
@@ -160,11 +208,9 @@ export default {
           item: [{ name: '电信' }, { name: '移动' }, { name: '联通' }]
         }
       ],
+      previewSku: [],
       addText: null,
       isLoading: false,
-      form: {
-        title: ''
-      },
       imageUrl: '',
       rules: {
         title: [
@@ -172,27 +218,31 @@ export default {
           { min: 1, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
         ]
       },
-      category: []
+      category: [],
+      skuSelectedText: null, // 已选规格
+      skuSelectedStock: null, // 已选规格库存
+      skuSelectedPrice: null, // 已选规格价格
+      form: {
+        name: null
+      }
     }
   },
   computed: {
     sku: {
       get() {
-        const spec = this.spec.map(x => {
+        const specAttr = this.specAttr.map(x => {
           return x.item.map(xx => xx.name)
         })
-        return this.createSku(spec)
+        return this.createSku(specAttr)
       },
-      set() {
-
-      }
+      set() {}
     }
   },
   methods: {
     addAttr() {
-      if (this.attrAddText == '' || this.attrAddText == null) return
-      if (this.spec.findIndex(item => item.name === this.attrAddText) === -1) {
-        this.spec.push({
+      if (this.attrAddText === '' || this.attrAddText === null) return
+      if (this.specAttr.findIndex(item => item.name === this.attrAddText) === -1) {
+        this.specAttr.push({
           name: this.attrAddText,
           addText: null,
           addinputVisible: false,
@@ -206,40 +256,39 @@ export default {
     },
     handleInputConfirm(e) {
       if (
-        this.spec[e].addText !== null &&
-        this.spec[e].item.findIndex(
-          item => item.name === this.spec[e].addText
+        this.specAttr[e].addText !== null &&
+        this.specAttr[e].item.findIndex(
+          item => item.name === this.specAttr[e].addText
         ) === -1
       ) {
         // 数组中没有这个规格
-        this.spec[e].item.push({
-          name: this.spec[e].addText
+        this.specAttr[e].item.push({
+          name: this.specAttr[e].addText
         })
-        this.spec[e].addText = null
+        this.specAttr[e].addText = null
       } else {
-        this.spec[e].addText = null
+        this.specAttr[e].addText = null
         this.$message.error('添加错误,请输入有效值或规格不能重复')
       }
 
-      this.spec[e].addinputVisible = false
+      this.specAttr[e].addinputVisible = false
     },
     showInput(e) {
-      this.spec[e].addinputVisible = true
+      this.specAttr[e].addinputVisible = true
       this.$nextTick(_ => {
         this.$refs.saveTagInput[0].$refs.input.focus()
       })
     },
     removeSpec(index) {
       /* @params { index } Number | String 属性下标 */
-      this.spec.splice(index, 1)
+      this.specAttr.splice(index, 1)
     },
     removeSpecItem(index, i) {
       // 删除 一个 规格
       /* @params { index } Number | String 属性下标
       /* @params { i } Number | String 规格下标
       */
-      console.log(index, i)
-      this.spec[index].item.splice(i, 1)
+      this.specAttr[index].item.splice(i, 1)
     },
     createSku(args) {
       const reslut = []
@@ -252,7 +301,7 @@ export default {
           const cur = [...prev, item]
           if (isLasted) {
             // 如果已是最后一项
-            reslut.push({ name: cur.toString(), price: 0, stock: 0 })
+            reslut.push({ name: cur.toString(), price: 0, stock: null })
           } else {
             // 否则继续遍历下一项
             nextPush(index + 1, cur)
@@ -260,17 +309,59 @@ export default {
         })
       }
       nextPush(0, [])
-      console.log(reslut)
       return reslut
     },
     batchSetting() {
-      console.log(this.batchNum)
-      console.log(this.batchType)
-      console.log(this.sku)
       this.sku = this.sku.map(x => {
         x[this.batchType] = this.batchNum
         return x
       })
+    },
+    preview() {
+      // 预览
+      const arr = this.specAttr.map(item => {
+        item.check = 0
+        item.item.map(items => {
+          items.disabled = items.stock === null
+          return items
+        })
+        return item
+      })
+      this.previewSku = JSON.parse(JSON.stringify(arr))
+
+      // 预览 已选规格
+      this.skuSelected()
+      this.dialogTableVisible = true
+    },
+    skuSelected() {
+      const ised = []
+      this.previewSku.forEach(item => {
+        ised.push(item.item[item.check].name)
+      })
+      const text = ised.toString() // 已选规格
+      this.sku.forEach(item => {
+        if (item.name === text) {
+          this.skuSelectedStock = item.stock === null ? '无限库存' : item.stock
+          this.skuSelectedPrice = item.price
+        }
+      })
+      this.skuSelectedText = text
+    },
+    async submit() {
+      try {
+        const { data } = await addGoodSpec({ spec: this.sku })
+        await addGoodAttr({
+          name: this.form.name,
+          spec: data._id,
+          attribute: this.specAttr
+        })
+
+        this.$message.success('添加成功')
+
+        this.$router.push('/sku/all')
+      } catch (error) {
+        console.log(error)
+      }
     }
   }
 }
@@ -292,5 +383,28 @@ export default {
 .el-tag {
   margin-right: 10px;
   margin-bottom: 10px;
+}
+.submit {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 0 0;
+  /deep/ .el-input {
+    max-width: 180px;
+    margin-left: 20px;
+  }
+}
+
+.sku {
+  &-attr {
+    padding: 10px 0 20px;
+    &__title {
+      color: #666;
+    }
+  }
+  &-minor {
+    &__title {
+      padding: 10px 0;
+    }
+  }
 }
 </style>

@@ -45,10 +45,26 @@
         <el-input v-model="form.price" placeholder="系统自会保留两位小数" />
       </el-form-item>
       <el-form-item label="划线价格" prop="through_price">
-        <el-input v-model="form.through_price" placeholder="系统自会保留两位小数" />
+        <el-input
+          v-model="form.through_price"
+          placeholder="系统自会保留两位小数"
+        />
       </el-form-item>
       <el-form-item label="是否隐藏">
         <el-switch v-model="form.isShow" />
+      </el-form-item>
+      <el-form-item label="是否开启多规格">
+        <el-switch v-model="form.isSku" />
+      </el-form-item>
+      <el-form-item label="选择规格">
+        <el-select v-model="form.sku" placeholder="请选择规格">
+          <el-option
+            v-for="(item, index) in sepcList"
+            :key="index"
+            :label="item.name"
+            :value="item._id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="商品描述" prop="content">
         <el-input v-model="form.content" type="textarea" />
@@ -61,6 +77,7 @@
           list-type="picture-card"
           :on-success="imagesSuccess"
           :on-remove="handleRemove"
+          multiple
           :limit="5"
           :auto-upload="false"
         >
@@ -68,14 +85,14 @@
         </el-upload>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">创建</el-button>
+        <el-button type="primary" @click="onSubmitImages">创建</el-button>
       </el-form-item>
     </el-form>
   </div>
 </template>
 
 <script>
-import { addGood } from '@/api/good'
+import { addGood, getGoodAttr } from '@/api/good'
 import { getCategory } from '@/api/category'
 export default {
   data() {
@@ -87,62 +104,77 @@ export default {
         callback(new Error('输入不正确'))
       }
     }
-
     return {
       isLoading: false,
       form: {
         title: '',
         isShow: false,
         content: '',
-        cover: null
+        cover: null,
+        images: []
       },
       imageUrl: '',
+      isUpimagesEd: false,
       rules: {
-        cover: [
-          { required: true, message: '请上传封面图!', trigger: 'blur' }
-        ],
+        cover: [{ required: true, message: '请上传封面图!', trigger: 'blur' }],
         title: [
           { required: true, message: '请输入商品标题', trigger: 'blur' },
-          { min: 1, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
+          {
+            min: 1,
+            max: 300,
+            message: '长度在 1 到 300 个字符',
+            trigger: 'blur'
+          }
         ],
-        price: [
-          { validator: valiPrice, required: true, trigger: 'blur' }
-        ],
+        price: [{ validator: valiPrice, required: true, trigger: 'blur' }],
         through_price: [
           { validator: valiPrice, required: true, trigger: 'blur' }
         ],
         content: [
           { required: true, message: '请输入商品描述', trigger: 'blur' },
-          { min: 3, max: 20, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+          {
+            min: 3,
+            max: 500,
+            message: '长度在 3 到 500 个字符',
+            trigger: 'blur'
+          }
         ]
       },
+      sepcList: [],
       category: []
     }
   },
   created() {
     this.fetchCategory()
+    this.fetchGetGoodAttr()
   },
   methods: {
+    async fetchGetGoodAttr() {
+      const { data } = await getGoodAttr()
+      this.sepcList = data.list
+    },
     async fetchCategory() {
       const { data } = await getCategory()
       this.category = data.list
     },
-    async onSubmit() {
-      this.loadingImages = this.$refs.uploadImages.uploadFiles.length
+    onSubmitImages() {
       this.$refs.uploadImages.submit()
-      this.$refs['ruleForm'].validate(async valid => {
+      this.onSubmit()
+    },
+    onSubmit() {
+      this.$refs['ruleForm'].validate(valid => {
         if (this.form.category === null) {
           return this.$alert('请选择分类!')
         }
         if (valid) {
           this.isLoading = true
-          try {
-            await addGood(this.form)
+          this.form.images = this.form.images.toString()
+          addGood(this.form).then(res => {
             this.$message.success('创建成功')
             this.$router.push('/good/all')
-          } catch (error) {
+          }).catch(error => {
             this.$message.error(error.response.data.message)
-          }
+          })
         } else {
           console.log('error submit!!')
           return false
@@ -156,20 +188,20 @@ export default {
     },
     beforeAvatarUpload(file) {
       const isJPG = file.type === 'image/jpeg' || file.type === 'image/png'
-      const isLt2M = file.size / 1024 / 1024 < 5
+      const isLt5M = file.size / 1024 / 1024 < 5
       if (!isJPG) {
         this.$message.error('上传头像图片只能是 JPG  PNG 格式!')
       }
-      if (!isLt2M) {
+      if (!isLt5M) {
         this.$message.error('上传头像图片大小不能超过 2MB!')
       }
-      return isJPG && isLt2M
+      return isJPG && isLt5M
     },
     handleRemove(file, fileList) {
       console.log(file, fileList)
     },
     imagesSuccess(res, file, fileList) {
-      this.from.images.push(res.url)
+      this.form.images.push(res.url)
     }
   }
 }

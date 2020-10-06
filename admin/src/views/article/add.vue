@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { addAtricle } from '@/api/article'
+import { addArticle } from '@/api/article'
 export default {
   data() {
     return {
@@ -42,16 +42,17 @@ export default {
   methods: {
     async onSubmit() {
       if (this.form.date == null) {
-        this.from.date = new Date()
+        this.form.date = new Date()
       }
       this.$refs['ruleForm'].validate(async valid => {
         if (valid) {
           try {
-            await addAtricle(this.form)
+            await addArticle(this.form)
             this.$message.success('创建成功')
             this.$router.push('/article/all')
           } catch (error) {
-            this.$message.error(error.response.data.message)
+            console.log(error)
+            this.$message.error(error.response)
           }
         } else {
           console.log('error submit!!')

@@ -36,8 +36,9 @@ module.exports = app => {
 
     if (req.Model.modelName == 'Article' || req.Model.modelName == 'Good') {
       queryOptions.populate = 'parent';
+    }else if(req.Model.modelName == 'goodAttribute'){
+      queryOptions.populate = 'spec';
     }
-
     const page = req.params.page || 0;
     const list = await req.Model.find()
       .skip(page * 20)

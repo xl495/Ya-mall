@@ -86,15 +86,15 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/atricle',
+    path: '/article',
     component: Layout,
-    redirect: '/atricle/all',
-    name: 'Atricle',
+    redirect: '/article/all',
+    name: 'Article',
     meta: { title: '文章管理', icon: 'example' },
     children: [
       {
         path: 'add',
-        name: 'AtricleAdd',
+        name: 'ArticleAdd',
         component: () => import('@/views/article/add'),
         meta: { title: '添加文章', icon: 'table' }
       },
@@ -111,7 +111,7 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/good/all',
     name: 'Good',
-    meta: { title: '商品管理', icon: 'lock' },
+    meta: { title: '商品管理', icon: 'table' },
     children: [
       {
         path: 'add',
@@ -132,7 +132,7 @@ export const constantRoutes = [
     component: Layout,
     redirect: '/sku/all',
     name: 'Sku',
-    meta: { title: '规格管理', icon: 'lock' },
+    meta: { title: '规格管理', icon: 'table' },
     children: [
       {
         path: 'add',
