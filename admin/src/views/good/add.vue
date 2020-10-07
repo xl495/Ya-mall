@@ -57,7 +57,7 @@
         <el-switch v-model="form.isSku" />
       </el-form-item>
       <el-form-item label="选择规格">
-        <el-select v-model="form.sku" placeholder="请选择规格">
+        <el-select v-model="form.spec" placeholder="请选择规格">
           <el-option
             v-for="(item, index) in sepcList"
             :key="index"
@@ -78,8 +78,13 @@
           :on-success="imagesSuccess"
           :on-remove="handleRemove"
           multiple
-          :limit="5"
+          :limit="7"
           :auto-upload="false"
+          :on-exceed="
+            () => {
+              $message.error('最多上传 7 张图片')
+            }
+          "
         >
           <i class="el-icon-plus" />
         </el-upload>
@@ -159,27 +164,33 @@ export default {
     },
     onSubmitImages() {
       this.$refs.uploadImages.submit()
-      this.onSubmit()
     },
     onSubmit() {
+      this.isLoading = true
       this.$refs['ruleForm'].validate(valid => {
         if (this.form.category === null) {
           return this.$alert('请选择分类!')
         }
-        if (valid) {
-          this.isLoading = true
-          this.form.images = this.form.images.toString()
-          addGood(this.form).then(res => {
-            this.$message.success('创建成功')
-            this.$router.push('/good/all')
-          }).catch(error => {
-            this.$message.error(error.response.data.message)
-          })
+        if (
+          valid &&
+          this.form.images.length === this.$refs.uploadImages.uploadFiles.length
+        ) {
+          // 校验通过 && 商品轮播图已经上传完成
+          this.form.images = this.form.images
+          addGood(this.form)
+            .then(res => {
+              this.$message.success('创建成功')
+              this.$router.push('/good/all')
+            })
+            .catch(error => {
+              this.$message.error(error.response.data.message)
+            })
         } else {
           console.log('error submit!!')
           return false
         }
       })
+      this.isLoading = false
     },
     handleAvatarSuccess(res, file) {
       this.$message.success('上传成功')
@@ -202,6 +213,7 @@ export default {
     },
     imagesSuccess(res, file, fileList) {
       this.form.images.push(res.url)
+      this.onSubmit()
     }
   }
 }

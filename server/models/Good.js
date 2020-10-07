@@ -6,7 +6,7 @@ const schema = new mongoose.Schema(
       default: '',
     },
     images: {
-      type: String, //数组的话前端传不过来
+      type: Array,
       required: true
     },
     title: {

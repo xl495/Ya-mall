@@ -114,11 +114,15 @@ export default {
         })
     },
     async update(data) {
-      this.$confirm(`您确定  ${data.isShow ? ' 上架 ' : '下架'} 产品吗?`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
+      this.$confirm(
+        `您确定  ${data.isShow ? ' 上架 ' : '下架'} 产品吗?`,
+        '提示',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
         .then(async() => {
           const sendData = { ...data }
           sendData.isShow = !data.isShow
@@ -139,3 +143,15 @@ export default {
   }
 }
 </script>
+<style lang="scss">
+.app-container {
+  /deep/ .cell {
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    word-break: break-all;
+    text-overflow: ellipsis;
+    max-height: 70px;
+  }
+}
+</style>
