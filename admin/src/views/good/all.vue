@@ -62,7 +62,7 @@
 </template>
 
 <script>
-import { getGood, removeGood, updateGood } from '@/api/good'
+import { getGoodList, removeGood, updateGood } from '@/api/good'
 export default {
   filters: {
     getStatus(status) {
@@ -81,13 +81,14 @@ export default {
   methods: {
     async fetchData() {
       this.listLoading = true
-      const { data } = await getGood()
+      const { data } = await getGoodList()
       console.log(data)
       this.list = data.list
       this.listLoading = false
     },
     handleClick(row) {
       console.log(row)
+      this.$router.push(`/good/edit/${row._id}`)
     },
     async removeCategory(row) {
       this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {

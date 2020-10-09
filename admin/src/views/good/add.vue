@@ -97,9 +97,15 @@
 </template>
 
 <script>
-import { addGood, getGoodAttr } from '@/api/good'
+import { getGood, addGood, getGoodAttr } from '@/api/good'
 import { getCategory } from '@/api/category'
 export default {
+  props: {
+    id: {
+      type: [String, Boolean],
+      default: false
+    }
+  },
   data() {
     var valiPrice = (rule, value, callback) => {
       var reg = /(^[1-9]\d*(\.\d{1,2})?$)|(^0(\.\d{1,2})?$)/
@@ -150,10 +156,17 @@ export default {
     }
   },
   created() {
+    this.id && this.fetData()
     this.fetchCategory()
     this.fetchGetGoodAttr()
   },
   methods: {
+    async fetData() {
+      const { data } = await getGood(this.id)
+      this.form = data
+      this.imageUrl = data.cover
+    },
+
     async fetchGetGoodAttr() {
       const { data } = await getGoodAttr()
       this.sepcList = data.list

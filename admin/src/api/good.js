@@ -1,8 +1,15 @@
 import request from '@/utils/request'
 
-export function getGood() {
+export function getGood(id) {
   return request({
-    url: '/rest/good',
+    url: `/rest/good/${id}`,
+    method: 'get'
+  })
+}
+
+export function getGoodList() {
+  return request({
+    url: `/rest/good`,
     method: 'get'
   })
 }

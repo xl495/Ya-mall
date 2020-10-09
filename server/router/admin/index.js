@@ -83,15 +83,14 @@ module.exports = app => {
       
       const file = req.file;
 
-      const suffix = file.originalname.split('.').pop() || '';
+      // const suffix = file.originalname.split('.').pop() || '';
 
-      let url = '';
+      let url = `http://localhost:3000/uploads/${file.filename}`;
 
-      if(file.mimetype == 'image/png' || file.mimetype == 'image/jpeg'){
-        url = `http://localhost:3000/uploads/images/${file.filename}.${suffix}`
-      }else {
-        url = `http://localhost:3000/uploads/${file.filename}.${suffix}`;
-      }
+     
+
+      console.log(url)  
+
       res.send({
         url,
       });

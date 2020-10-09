@@ -38,12 +38,6 @@ export const constantRoutes = [
   },
 
   {
-    path: '/404',
-    component: () => import('@/views/404'),
-    hidden: true
-  },
-
-  {
     path: '/',
     component: Layout,
     redirect: '/dashboard',
@@ -53,6 +47,25 @@ export const constantRoutes = [
         name: 'Dashboard',
         component: () => import('@/views/dashboard/index'),
         meta: { title: 'Dashboard', icon: 'dashboard' }
+      }
+    ]
+  },
+  {
+    path: '/swiper',
+    component: Layout,
+    meta: { title: '轮播管理', icon: 'form' },
+    children: [
+      {
+        path: 'all',
+        name: 'swiperAll',
+        component: () => import('@/views/swiper/all'),
+        meta: { title: '轮播管理', icon: 'form' }
+      },
+      {
+        path: 'add',
+        name: 'swiperAdd',
+        component: () => import('@/views/swiper/add'),
+        meta: { title: '添加轮播', icon: 'form' }
       }
     ]
   },
@@ -118,6 +131,14 @@ export const constantRoutes = [
         name: 'GoodAdd',
         component: () => import('@/views/good/add'),
         meta: { title: '添加商品', icon: 'table' }
+      },
+      {
+        path: 'edit/:id',
+        name: 'GoodEdit',
+        props: true,
+        hidden: true,
+        component: () => import('@/views/good/add'),
+        meta: { title: '编辑商品', icon: 'table' }
       },
       {
         path: 'all',
@@ -253,7 +274,11 @@ export const constantRoutes = [
       }
     ]
   },
-
+  {
+    path: '/404',
+    component: () => import('@/views/404'),
+    hidden: true
+  },
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
 ]
